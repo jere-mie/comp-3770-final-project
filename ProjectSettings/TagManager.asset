@@ -7,6 +7,7 @@ TagManager:
   - ReputationBar
   - BattleCanvas
   - Opponent
+  - WinnerImage
   layers:
   - Default
   - TransparentFX
