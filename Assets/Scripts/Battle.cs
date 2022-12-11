@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,6 +22,8 @@ public class Battle : MonoBehaviour {
     bool notTerminated; // checks for a termination condition
     float storedTime; // game time before the script was frozen
     int activeMove; // current move, if there is one 
+    bool animationToggle;
+    string buttonPressed;
     IDanceMove robot;
     IDanceMove sprinkler;
     IDanceMove headbang;
@@ -45,6 +48,8 @@ public class Battle : MonoBehaviour {
         robot = new Robot();
         sprinkler = new Sprinkler();
         headbang = new Headbang();
+        animationToggle = false;
+        buttonPressed = "";
     }
 
 
@@ -53,24 +58,8 @@ public class Battle : MonoBehaviour {
         if (healthBar.value >= 100) {
             // Make winner screen appear
             StartCoroutine(Winner());
-        }
-        if (lockout) {
-            storedTime += Time.deltaTime;
-            switch (activeMove) {
-                case 0: GetInput(ref robot); break;
-                case 1: GetInput(ref sprinkler); break;
-                case 2: GetInput(ref headbang); break;
-                default: break;
-            }
-        }
-        if (timeOffset >= 2) {
-            Debug.Log("timeout");
-            notTerminated = false;
-        }
-        if (!notTerminated) {
-            Debug.Log("terminating...");
-            Debug.Log($"damage inflicted: {damageMultiplier * (activeMove == 0 ? robot.Damage : (activeMove == 1 ? sprinkler.Damage : headbang.Damage))}");
-            Reset();
+        } else {
+            Dance();
         }
     }
 
@@ -86,12 +75,14 @@ public class Battle : MonoBehaviour {
     void OnAttack() {
         playerCanAttack = false;
         healthBar.value += attackPower;
+        Debug.Log(attackPower);
+        Debug.Log("here");
         StartCoroutine(OpponentAttack());
     }
 
     IEnumerator OpponentAttack() {
         yield return new WaitForSeconds(3);
-        int move = Random.Range(1, 4);
+        int move = UnityEngine.Random.Range(1, 4);
         switch (move) {
             case 1:
                 animationTime = (int)(30 * 2.5);
@@ -119,67 +110,122 @@ public class Battle : MonoBehaviour {
     }
 
     public void OnHeadbang() {
-        if (playerCanAttack && !lockout) {
-            if (headbang.CurrentCooldown > 0) {
-                Debug.Log($"sprinkler on cooldown; turns left: {sprinkler.CurrentCooldown}");
-            } else {
-                lockout = true;
-                activeMove = headbang.Id;
-                headbang.SetCooldown();
-            
-                // Strategy code here
-                attackPower = headbang.Damage * damageMultiplier;
-                // Activates animation
-                animationTime = (int)(30 * 2.5);
-                pAnimator.SetInteger("dance", 1);
-
-                OnAttack();
-            }
-        }
+        buttonPressed = "c";
     }
 
     public void OnSprinkler() {
-        if (playerCanAttack && !lockout) {
-            // Strategy code here
-            attackPower = sprinkler.Damage;
-            // Activates animation
-            animationTime = (int)(50 * 2.5);
-            pAnimator.SetInteger("dance", 2);
-
-            OnAttack();
-        }
+        buttonPressed = "b";
     }
 
     public void OnRobot() {
-        if (playerCanAttack && !lockout) {
-            // Strategy code here
-            attackPower = robot.Damage;
-            // Activates animation
-            animationTime = (int)(50 * 2.5);
-            pAnimator.SetInteger("dance", 3);
-            
+        buttonPressed = "a";
+    }
+    void Dance() {
+    try {
+        var timeOffset = storedTime - borrowedTime;
+        if (playerCanAttack) {
+            if (buttonPressed == "a" && !lockout) {
+                if (robot.CurrentCooldown > 0) {
+                    Debug.Log($"robot on cooldown; turns left: {robot.CurrentCooldown}");
+                } else {
+                    Debug.Log($"cooldown = {robot.CurrentCooldown}");
+                    Debug.Log("a entered");
+                    lockout = true;
+                    activeMove = robot.Id;
+                    robot.SetCooldown();
+                }
+            }
+            if (buttonPressed == "b" && !lockout) {
+                if (sprinkler.CurrentCooldown > 0) {
+                    Debug.Log($"sprinkler on cooldown; turns left: {sprinkler.CurrentCooldown}");
+                } else {
+                    Debug.Log("b entered");
+                    lockout = true;
+                    activeMove = sprinkler.Id;
+                    sprinkler.SetCooldown();
+                }
+            }
+            if (buttonPressed == "c" && !lockout) {
+                if (headbang.CurrentCooldown > 0) {
+                    Debug.Log($"headbang on cooldown; turns left: {headbang.CurrentCooldown}");
+                } else {
+                    Debug.Log("c entered");
+                    lockout = true;
+                    activeMove = headbang.Id;
+                    headbang.SetCooldown();
+                }
+            }
+            if (lockout) {
+                storedTime += Time.deltaTime;
+                switch (activeMove) {
+                    case 0: GetInput(ref robot); break;
+                    case 1: GetInput(ref sprinkler); break;
+                    case 2: GetInput(ref headbang); break;
+                    default: break;
+                }
+            }
+            if (timeOffset >= 2) {
+                Debug.Log("timeout");
+                notTerminated = false;
+            }
+            if (!notTerminated) {
+                Debug.Log("terminating...");
+                animationToggle = true;
+                switch (activeMove) {
+                    case 0: attackPower = robot.Damage * damageMultiplier; break;
+                    case 1: attackPower = sprinkler.Damage * damageMultiplier; break;
+                    case 2: attackPower = headbang.Damage * damageMultiplier; break;
+                    default: break;
+                }
+                Debug.Log($"damage inflicted: {damageMultiplier * (activeMove == 0 ? robot.Damage : (activeMove == 1 ? sprinkler.Damage : headbang.Damage))}");
+                Animation();
+                Reset();
+            }
+        }
+    }
+    catch (InvalidOperationException e) {
+        Debug.Log($"tried to peek when stack was empty: {e}");
+    }
+}
+    void Animation() {
+        if (animationToggle) {
+            switch (activeMove) {
+                case 0:
+                    animationTime = (int)(50 * 2.5);
+                    pAnimator.SetInteger("dance", 3);
+                    break;
+                case 1:
+                    animationTime = (int)(50 * 2.5);
+                    pAnimator.SetInteger("dance", 2);
+                    break;
+                case 2:
+                    animationTime = (int)(30 * 2.5);
+                    pAnimator.SetInteger("dance", 1);
+                    break;
+            }
+            animationToggle = false;
             OnAttack();
         }
     }
     void GetInput(ref IDanceMove move) {
-    Debug.Log($"made it to GetInput; notTerminated = {notTerminated}");
-    if (Input.GetKeyDown(KeyCode.UpArrow)) {
-        Debug.Log("up arrow pressed");
-        MatchMove(ref move, KeyCode.UpArrow);
-    }
-    if (Input.GetKeyDown(KeyCode.DownArrow)) {
-        Debug.Log("down arrow pressed");
-        MatchMove(ref move, KeyCode.DownArrow);
-    }
-    if (Input.GetKeyDown(KeyCode.LeftArrow)) {
-        Debug.Log($"Stack: {move.CurrentSequence.Peek()}");
-        Debug.Log("left arrow pressed");
-        MatchMove(ref move, KeyCode.LeftArrow);
-    }
-    if (Input.GetKeyDown(KeyCode.RightArrow)) {
-        Debug.Log("right arrow pressed");
-        MatchMove(ref move, KeyCode.RightArrow);
-    }
+        Debug.Log($"made it to GetInput; notTerminated = {notTerminated}");
+        if (Input.GetKeyDown(KeyCode.UpArrow)) {
+            Debug.Log("up arrow pressed");
+            MatchMove(ref move, KeyCode.UpArrow);
+        }
+        if (Input.GetKeyDown(KeyCode.DownArrow)) {
+            Debug.Log("down arrow pressed");
+            MatchMove(ref move, KeyCode.DownArrow);
+        }
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) {
+            Debug.Log($"Stack: {move.CurrentSequence.Peek()}");
+            Debug.Log("left arrow pressed");
+            MatchMove(ref move, KeyCode.LeftArrow);
+        }
+        if (Input.GetKeyDown(KeyCode.RightArrow)) {
+            Debug.Log("right arrow pressed");
+            MatchMove(ref move, KeyCode.RightArrow);
+        }
     }
     void MatchMove(ref IDanceMove move, KeyCode key) {
         Debug.Log($"move = {move}");
@@ -211,5 +257,7 @@ public class Battle : MonoBehaviour {
         activeMove = -1;
         lockout = false;
         storedTime = 0f;
+        animationToggle = false;
+        buttonPressed = "";
     }
 }
