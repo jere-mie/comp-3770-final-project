@@ -27,6 +27,7 @@ public class Battle : MonoBehaviour {
     IDanceMove robot; // robot dance object
     IDanceMove sprinkler; // sprinkler object
     IDanceMove headbang; // headbang object
+    GameObject buttons; // player attack buttons
 
     void Awake() {
         winnerImage = GameObject.FindWithTag("WinnerImage");
@@ -38,6 +39,7 @@ public class Battle : MonoBehaviour {
         healthBar = GameObject.FindWithTag("ReputationBar").GetComponent<Slider>();
         pAnimator = GameObject.FindWithTag("Player").GetComponent<Animator>();
         oAnimator = GameObject.FindWithTag("Opponent").GetComponent<Animator>();
+        buttons =  GameObject.FindWithTag("AttackButtons");
 
         damageMultiplier = 0f;
         borrowedTime = 0;
@@ -77,6 +79,7 @@ public class Battle : MonoBehaviour {
         healthBar.value += attackPower;
         Debug.Log(attackPower);
         Debug.Log("here");
+        buttons.SetActive(false);
         StartCoroutine(OpponentAttack());
     }
 
@@ -98,7 +101,7 @@ public class Battle : MonoBehaviour {
         healthBar.value -= attackPower;
 
         yield return new WaitForSeconds(3);
-
+        buttons.SetActive(true);
         playerCanAttack = true;
     }
 
