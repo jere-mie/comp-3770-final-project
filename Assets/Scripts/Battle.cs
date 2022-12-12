@@ -27,7 +27,10 @@ public class Battle : MonoBehaviour {
     IDanceMove robot; // robot dance object
     IDanceMove sprinkler; // sprinkler object
     IDanceMove headbang; // headbang object
-    GameObject buttons; // player attack buttons
+    GameObject buttons; // all player attack buttons
+    Image headbangButton;
+    Image robotButton;
+    Image sprinklerButton;
 
     void Awake() {
         winnerImage = GameObject.FindWithTag("WinnerImage");
@@ -40,6 +43,9 @@ public class Battle : MonoBehaviour {
         pAnimator = GameObject.FindWithTag("Player").GetComponent<Animator>();
         oAnimator = GameObject.FindWithTag("Opponent").GetComponent<Animator>();
         buttons =  GameObject.FindWithTag("AttackButtons");
+        headbangButton = GameObject.FindWithTag("Headbang").GetComponent<Image>();
+        robotButton = GameObject.FindWithTag("Robot").GetComponent<Image>();
+        sprinklerButton = GameObject.FindWithTag("Sprinkler").GetComponent<Image>();
 
         damageMultiplier = 0f;
         borrowedTime = 0;
@@ -143,6 +149,7 @@ public class Battle : MonoBehaviour {
                     Debug.Log($"cooldown = {robot.CurrentCooldown}");
                     Debug.Log("a entered");
                     lockout = true;
+                    robotButton.material.color = Color.green;
                     activeMove = robot.Id;
                     robot.SetCooldown();
                 }
@@ -153,6 +160,7 @@ public class Battle : MonoBehaviour {
                 } else {
                     Debug.Log("b entered");
                     lockout = true;
+                    sprinklerButton.material.color = Color.green;
                     activeMove = sprinkler.Id;
                     sprinkler.SetCooldown();
                 }
@@ -163,6 +171,7 @@ public class Battle : MonoBehaviour {
                 } else {
                     Debug.Log("c entered");
                     lockout = true;
+                    headbangButton.material.color = Color.green;
                     activeMove = headbang.Id;
                     headbang.SetCooldown();
                 }
@@ -183,6 +192,7 @@ public class Battle : MonoBehaviour {
             if (!notTerminated) {
                 Debug.Log("terminating...");
                 animationToggle = true;
+                SetOriginal();
                 switch (activeMove) {
                     case 0: attackPower = robot.Damage * damageMultiplier; break;
                     case 1: attackPower = sprinkler.Damage * damageMultiplier; break;
@@ -293,4 +303,13 @@ public class Battle : MonoBehaviour {
         animationToggle = false;
         buttonPressed = "";
     }
+    /// <summary>
+    /// Method <c>SetGreen</c> sets a GameObject's colour to green.
+    /// </summary>
+    /// <param name="r">A Renderer object, passed by reference, that is tied to a GameObject.</param>
+    void SetGreen(ref Image img) => img.material.color = Color.green;
+    /// <summary>
+    /// Method <c>SetOriginal</c> sets a GameObject's colour to white.
+    /// </summary>
+    void SetOriginal() => headbangButton.material.color = robotButton.material.color = sprinklerButton.material.color = Color.white;
 }
