@@ -16,17 +16,17 @@ public class Battle : MonoBehaviour {
     private int animationTime = 0;
     private float attackPower = 0;
     private GameObject winnerImage;
-    float damageMultiplier; // arbitrary (for now) damage variable to demonstrate concept
+    float damageMultiplier; // the percentage of correct moves (in decimal form) from the user
     bool lockout; // Lock to one move while in progress
     int borrowedTime; // time added for each correct key press
     bool notTerminated; // checks for a termination condition
     float storedTime; // game time before the script was frozen
     int activeMove; // current move, if there is one 
-    bool animationToggle;
-    string buttonPressed;
-    IDanceMove robot;
-    IDanceMove sprinkler;
-    IDanceMove headbang;
+    bool animationToggle; // toggle for whether animations can be used in the current state of the program
+    string buttonPressed; // which of the three move buttons in the GUI is pressed
+    IDanceMove robot; // robot dance object
+    IDanceMove sprinkler; // sprinkler object
+    IDanceMove headbang; // headbang object
 
     void Awake() {
         winnerImage = GameObject.FindWithTag("WinnerImage");
@@ -108,18 +108,27 @@ public class Battle : MonoBehaviour {
         
         SceneManager.LoadScene("Open");
     }
-
+    /// <summary>
+    /// Method <c>OnHeadbang</c> triggers when headbang button pressed.
+    /// </summary>
     public void OnHeadbang() {
         buttonPressed = "c";
     }
-
+    /// <summary>
+    /// Method <c>OnSprinkler</c> triggers when sprinkler button pressed.
+    /// </summary>
     public void OnSprinkler() {
         buttonPressed = "b";
     }
-
+    /// <summary>
+    /// Method <c>OnRobot</c> triggers when robot button pressed.
+    /// </summary>
     public void OnRobot() {
         buttonPressed = "a";
     }
+    /// <summary>
+    /// Method <c>Dance</c> detects when a button is pressed in-game using buttonPressed, which then modulates the lockout state variable which determines whether arrow key input will be accepted. It also handles game time, timeout, and resetting the script as needed.
+    /// </summary>
     void Dance() {
     try {
         var timeOffset = storedTime - borrowedTime;
@@ -187,26 +196,39 @@ public class Battle : MonoBehaviour {
         Debug.Log($"tried to peek when stack was empty: {e}");
     }
 }
+    /// <summary>
+    /// Method <c>Animation</c> controls player animations, using animationToggle to determine whether it should be searching for an animation to play at a given time, since this runs in Dance which runs in Update.
+    /// </summary>
     void Animation() {
         if (animationToggle) {
             switch (activeMove) {
                 case 0:
-                    animationTime = (int)(50 * 2.5);
-                    pAnimator.SetInteger("dance", 3);
+                    if (damageMultiplier > 0) {
+                        animationTime = (int)(50 * 2.5);
+                        pAnimator.SetInteger("dance", 3);
+                    }
                     break;
                 case 1:
-                    animationTime = (int)(50 * 2.5);
-                    pAnimator.SetInteger("dance", 2);
+                    if (damageMultiplier > 0) {
+                        animationTime = (int)(50 * 2.5);
+                        pAnimator.SetInteger("dance", 2);
+                    }
                     break;
                 case 2:
-                    animationTime = (int)(30 * 2.5);
-                    pAnimator.SetInteger("dance", 1);
+                    if (damageMultiplier > 0) {
+                        animationTime = (int)(30 * 2.5);
+                        pAnimator.SetInteger("dance", 1);
+                    }
                     break;
             }
             animationToggle = false;
             OnAttack();
         }
     }
+    /// <summary>
+    /// Method <c>GetInput</c> is called from Dance when the lockout variable, which stops GUI button input, is set. This method checks for user arrow key input and passes it to MatchMove along with the current move.
+    /// </summary>
+    /// <param name="move">The currently active move, passed by reference so the original is modified.</param>
     void GetInput(ref IDanceMove move) {
         Debug.Log($"made it to GetInput; notTerminated = {notTerminated}");
         if (Input.GetKeyDown(KeyCode.UpArrow)) {
@@ -227,6 +249,11 @@ public class Battle : MonoBehaviour {
             MatchMove(ref move, KeyCode.RightArrow);
         }
     }
+    /// <summary>
+    /// Method <c>MatchMove</c> pops from the stack and calculates damage for each accepted move. Also increments borrowedTime, which is used in Dance to control the move timeout. If a move fails/timeout occurs, notTerminated is set and, as seen in Dance, the termination logic occurs.
+    /// </summary>
+    /// <param name="move">The currently active move, passed by reference so the original is modified.</param>
+    /// <param name="key">The key that was pressed by the user, passed from GetInput</param>
     void MatchMove(ref IDanceMove move, KeyCode key) {
         Debug.Log($"move = {move}");
         Debug.Log($"expected key press: {move.CurrentSequence.Peek()}");
@@ -244,6 +271,9 @@ public class Battle : MonoBehaviour {
             notTerminated = false;
         }
     }
+    /// <summary>
+    /// Method <c>Reset</c> resets variables, decrements cooldown, resets stack, all in preparation for the next move to be executed by the user.
+    /// </summary>
     void Reset() {
         damageMultiplier = 0f;
         borrowedTime = 0;
