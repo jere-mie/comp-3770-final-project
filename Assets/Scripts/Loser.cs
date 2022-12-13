@@ -18,7 +18,7 @@ public class Loser : MonoBehaviour
     }
     IEnumerator Lose()
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(5);
         SceneManager.LoadScene("OpenWorld");
     }
 }
