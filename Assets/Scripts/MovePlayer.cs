@@ -24,6 +24,8 @@ public class MovePlayer : MonoBehaviour
 
     public PlayerControls playerControls;
 
+    private Animator animator;
+
     // private Data data;
 
     void Awake()
@@ -31,6 +33,7 @@ public class MovePlayer : MonoBehaviour
         characterController = gameObject.GetComponent<CharacterController>();
         playerControls = new PlayerControls();
         playerControls.Player.Enable();
+        animator = transform.Find("PlayerModel").GetComponent<Animator>();
         // data = GameObject.Find("DataStorage").GetComponent<Data>();
     }
 
@@ -69,8 +72,17 @@ public class MovePlayer : MonoBehaviour
     }
     private void ApplyMovement()
     {
+        // animator.SetBool("isWalking", true);
         float angley = getAngleY();
-
+        if(direction.x == 0 && direction.z == 0){
+            Debug.Log("NOT Walking");
+            Debug.Log(direction);
+            animator.SetBool("isWalking", false);
+        }else{
+            Debug.Log("Walking");
+            Debug.Log(direction);
+            animator.SetBool("isWalking", true);
+        }
         characterController.Move(Quaternion.Euler(0, angley, 0) * direction * speed * Time.deltaTime);
     }
 
