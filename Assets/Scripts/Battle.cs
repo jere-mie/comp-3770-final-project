@@ -59,7 +59,9 @@ public class Battle : MonoBehaviour {
         var timeOffset = storedTime - borrowedTime;
         if (healthBar.value >= 100) {
             // Make winner screen appear
-            StartCoroutine(Winner());
+            SceneManager.LoadScene("Winner");
+        } else if (healthBar.value <= 0) {
+            SceneManager.LoadScene("Loser");
         } else {
             Dance();
         }
@@ -105,12 +107,12 @@ public class Battle : MonoBehaviour {
         playerCanAttack = true;
     }
 
-    IEnumerator Winner() {
-        winnerImage.SetActive(true);
-        yield return new WaitForSeconds(3);
+    // IEnumerator Winner() {
+    //     winnerImage.SetActive(true);
+    //     yield return new WaitForSeconds(3);
         
-        SceneManager.LoadScene("Open");
-    }
+    //     SceneManager.LoadScene("Winner");
+    // }
     /// <summary>
     /// Method <c>OnHeadbang</c> triggers when headbang button pressed.
     /// </summary>
