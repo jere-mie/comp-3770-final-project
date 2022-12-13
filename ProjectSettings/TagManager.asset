@@ -8,6 +8,10 @@ TagManager:
   - BattleCanvas
   - Opponent
   - WinnerImage
+  - AttackButtons
+  - Headbang
+  - Robot
+  - Sprinkler
   layers:
   - Default
   - TransparentFX
