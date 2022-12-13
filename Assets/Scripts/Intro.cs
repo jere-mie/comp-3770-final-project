@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Winner : MonoBehaviour
+public class Intro : MonoBehaviour
 {
-    public void onReplay(){
-        SceneManager.LoadScene("MainMenu");
+    public void OnContinue()
+    {
+        SceneManager.LoadScene("OpenWorld");
     }
 }

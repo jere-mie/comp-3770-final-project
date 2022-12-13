@@ -107,7 +107,7 @@ public class MovePlayer : MonoBehaviour
     }
     void OnTriggerEnter(Collider collider){
         if(collider.CompareTag("Finish")){
-                SceneManager.LoadScene("SampleScene");
+                SceneManager.LoadScene("Battle");
         }
     }
 }

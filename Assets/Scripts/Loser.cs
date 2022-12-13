@@ -14,10 +14,11 @@ public class Loser : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
-    IEnumerator Lose() {
+    IEnumerator Lose()
+    {
         yield return new WaitForSeconds(3);
-        SceneManager.LoadScene("Open");
+        SceneManager.LoadScene("OpenWorld");
     }
 }
