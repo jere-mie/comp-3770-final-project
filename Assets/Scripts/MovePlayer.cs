@@ -42,8 +42,8 @@ public class MovePlayer : MonoBehaviour
     {
         // applying rotation
         Vector2 transVector = playerControls.Player.LookMouse.ReadValue<Vector2>();
-        rot.x = transVector.y * 100f * Time.deltaTime;
-        rot.y += transVector.x * 50f * Time.deltaTime;
+        rot.x = transVector.y * 25f * Time.deltaTime;
+        rot.y += transVector.x * 25f * Time.deltaTime;
 
         xRotation -= rot.x;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
