@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class MovePlayer : MonoBehaviour
 {
@@ -39,7 +40,7 @@ public class MovePlayer : MonoBehaviour
         // applying rotation
         Vector2 transVector = playerControls.Player.LookMouse.ReadValue<Vector2>();
         rot.x = transVector.y * 100f * Time.deltaTime;
-        rot.y += transVector.x * 100f * Time.deltaTime;
+        rot.y += transVector.x * 50f * Time.deltaTime;
 
         xRotation -= rot.x;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
@@ -91,5 +92,10 @@ public class MovePlayer : MonoBehaviour
             angley += 360f;
         }
         return angley;
+    }
+    void OnTriggerEnter(Collider collider){
+        if(collider.CompareTag("Finish")){
+                SceneManager.LoadScene("SampleScene");
+        }
     }
 }
